@@ -538,11 +538,11 @@ impl ChartView {
                     }
                     let yl = |v: f64| lower.center().y - (v / amp) as f32 * lower.height() * 0.45;
                     lp.hline(lower.x_range(), yl(0.0), Stroke::new(1.0, p.line));
-                    for i in lo..=hi {
-                        if m.hist[i].is_finite() {
+                    for (i, &h) in m.hist.iter().enumerate().take(hi + 1).skip(lo) {
+                        if h.is_finite() {
                             let x = x_of(i as f64);
-                            let col = if m.hist[i] >= 0.0 { p.up } else { p.down };
-                            lp.rect_filled(Rect::from_two_pos(pos2(x - bw * 0.35, yl(0.0)), pos2(x + bw * 0.35, yl(m.hist[i]))), CornerRadius::ZERO, col.gamma_multiply(0.45));
+                            let col = if h >= 0.0 { p.up } else { p.down };
+                            lp.rect_filled(Rect::from_two_pos(pos2(x - bw * 0.35, yl(0.0)), pos2(x + bw * 0.35, yl(h))), CornerRadius::ZERO, col.gamma_multiply(0.45));
                         }
                     }
                     for (vals, col) in [(&m.line, p.sma_fast), (&m.signal, p.sma_slow)] {
