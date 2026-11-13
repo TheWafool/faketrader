@@ -31,7 +31,7 @@ codegen-units = 1
 strip = true
 panic = "abort"
 
-# Installers for every desktop OS: `cargo packager --release`.
+# Installers for every desktop OS: `cargo build --release && cargo packager --release`.
 [package.metadata.packager]
 product-name = "FakeTrader"
 identifier = "dev.faketrader.FakeTrader"
@@ -39,7 +39,6 @@ publisher = "FakeTrader"
 category = "Finance"
 description = "Practice trading on real charts without risking money"
 icons = ["assets/icon-256.png", "assets/icon-512.png", "assets/icon.ico"]
-before-packaging-command = "cargo build --release"
 out-dir = "dist"
 binaries = [{ path = "faketrader", main = true }]
 long-description = "Replay real stock charts bar by bar with the future hidden, quiz yourself on candlestick and chart patterns, paper trade live prices, and keep a journal with R-multiples and coaching notes."

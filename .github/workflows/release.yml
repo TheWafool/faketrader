@@ -1,0 +1,75 @@
+name: Release
+
+# Push a tag like v0.1.0 to build installers for every platform and attach them to a draft release.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            formats: deb,appimage
+          - os: ubuntu-22.04-arm
+            target: aarch64-unknown-linux-gnu
+            formats: deb,appimage
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            formats: nsis,wix
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            formats: app,dmg
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            formats: app,dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - name: Linux build deps
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgl1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libfuse2
+      - name: Install cargo-packager
+        run: cargo install cargo-packager --locked
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }}
+      - name: Package
+        run: cargo packager --release --target ${{ matrix.target }} --formats ${{ matrix.formats }}
+      - name: Portable archive
+        shell: bash
+        run: |
+          cd target/${{ matrix.target }}/release
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            7z a "$GITHUB_WORKSPACE/dist/faketrader-${{ matrix.target }}.zip" faketrader.exe
+          else
+            tar czf "$GITHUB_WORKSPACE/dist/faketrader-${{ matrix.target }}.tar.gz" faketrader
+          fi
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          files: |
+            dist/*.deb
+            dist/*.AppImage
+            dist/*.exe
+            dist/*.msi
+            dist/*.dmg
+            dist/*.zip
+            dist/*.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: faketrader-${{ matrix.target }}
+          path: dist/*

@@ -115,9 +115,9 @@ pub fn atr(c: &[Candle], n: usize) -> Vec<f64> {
     };
     let mut a: f64 = (1..=n).map(tr).sum::<f64>() / n as f64;
     out[n] = a;
-    for i in n + 1..c.len() {
+    for (i, slot) in out.iter_mut().enumerate().skip(n + 1) {
         a = (a * (n - 1) as f64 + tr(i)) / n as f64;
-        out[i] = a;
+        *slot = a;
     }
     out
 }

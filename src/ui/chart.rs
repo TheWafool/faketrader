@@ -372,9 +372,9 @@ impl ChartView {
         // Overlay lines.
         let series_line = |vals: &[f64], col: Color32, w: f32| {
             let mut seg: Vec<Pos2> = Vec::new();
-            for i in lo..=hi {
-                if vals[i].is_finite() {
-                    seg.push(pos2(x_of(i as f64), y_of(vals[i])));
+            for (i, &v) in vals.iter().enumerate().take(hi + 1).skip(lo) {
+                if v.is_finite() {
+                    seg.push(pos2(x_of(i as f64), y_of(v)));
                 } else if seg.len() > 1 {
                     mp.add(Shape::line(std::mem::take(&mut seg), Stroke::new(w, col)));
                 } else {
