@@ -48,11 +48,31 @@ On the chart: drag to pan, scroll to zoom, double-click to jump back to the late
 
 ## Install
 
-Installers for each release are on the releases page:
+Download from the [releases page](https://github.com/TheWafool/faketrader/releases/latest).
 
-- **Windows:** `.exe` (NSIS) or `.msi`
-- **macOS:** `.dmg`, separate builds for Apple silicon and Intel. The builds are unsigned, so the first time you open the app, right-click it and choose Open.
-- **Linux:** `.AppImage`, `.deb`, or the AUR package `faketrader`
+**Arch, CachyOS, Manjaro (AUR-style build).** Paste this into a terminal. It downloads the PKGBUILD, builds the package from source and installs it:
+
+```sh
+mkdir -p /tmp/faketrader && cd /tmp/faketrader && curl -fsSLO https://github.com/TheWafool/faketrader/releases/latest/download/PKGBUILD && makepkg -si
+```
+
+You need `base-devel` and `rust` (or `rustup`) installed. The first build takes a few minutes.
+
+**Debian, Ubuntu, Mint.** Download the `.deb`, then:
+
+```sh
+sudo apt install ./faketrader_*_amd64.deb
+```
+
+**Any Linux (AppImage).** Download the `.AppImage`, then:
+
+```sh
+chmod +x faketrader_*.AppImage && ./faketrader_*.AppImage
+```
+
+**Windows.** Run the `-setup.exe` installer (or the `.msi`). Windows SmartScreen may warn because the build is unsigned: choose More info, then Run anyway. A portable `.zip` with just the `.exe` is also attached.
+
+**macOS.** Open the `.dmg` and drag FakeTrader to Applications. Pick the Apple silicon build for M-series Macs and the Intel build otherwise. The app is unsigned, so the first time, right-click it and choose Open.
 
 ### Build from source
 
@@ -72,7 +92,7 @@ cargo build --release
 cargo packager --release            # writes to dist/
 ```
 
-The AUR recipe is in `packaging/aur/PKGBUILD`. Before publishing, point `url` at the public repository and run `updpkgsums`.
+The package recipe is in `packaging/aur/PKGBUILD`.
 
 ## Data
 
