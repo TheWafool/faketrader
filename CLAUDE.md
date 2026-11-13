@@ -14,7 +14,7 @@ Rust desktop paper trader / trading trainer. eframe/egui 0.37 with the glow (Ope
 ## Status (2026-11-13)
 - All six screens work against live data: Replay, Pattern quiz, Paper desk, Journal, Patterns, Settings.
 - Verified locally: 14 tests, clippy clean, deb and AppImage build, PKGBUILD builds with makepkg.
-- Not verified: the Windows and macOS builds and the release workflow (they need CI runners). No repo remote yet, so PKGBUILD `url` is a placeholder.
+- Pushed to github.com/TheWafool/faketrader; v0.1.0 released, CI and release workflow pass on Linux, Windows, macOS. Windows and macOS installers not run by hand.
 - No web/wasm build. It would need ehttp in place of ureq, no threads, and browser storage, and Yahoo blocks browser CORS anyway.
 
 ## Ideas not built
