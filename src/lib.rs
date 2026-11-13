@@ -7,4 +7,4 @@ pub mod patterns;
 pub mod stats;
 pub mod store;
 pub mod trainer;
-// pub mod ui;
+pub mod ui;

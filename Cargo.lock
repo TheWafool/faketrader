@@ -1109,6 +1109,7 @@ dependencies = [
  "csv",
  "directories",
  "eframe",
+ "egui",
  "rfd",
  "serde",
  "serde_json",

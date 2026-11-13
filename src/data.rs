@@ -108,11 +108,10 @@ pub fn parse_yahoo(symbol: &str, interval: Interval, text: &str) -> Result<Serie
     let mut candles = Vec::with_capacity(ts.len());
     for (i, &t) in ts.iter().enumerate() {
         let get = |v: &Vec<Option<f64>>| v.get(i).copied().flatten();
-        if let (Some(o), Some(h), Some(l), Some(c)) = (get(&q.open), get(&q.high), get(&q.low), get(&q.close)) {
-            if o > 0.0 && h >= l {
+        if let (Some(o), Some(h), Some(l), Some(c)) = (get(&q.open), get(&q.high), get(&q.low), get(&q.close))
+            && o > 0.0 && h >= l {
                 candles.push(Candle { t, o, h, l, c, v: get(&q.volume).unwrap_or(0.0) });
             }
-        }
     }
     if candles.is_empty() {
         bail!("{symbol} has no bars at {} resolution", interval.label());
@@ -120,10 +119,47 @@ pub fn parse_yahoo(symbol: &str, interval: Interval, text: &str) -> Result<Serie
     Ok(Series { symbol: symbol.to_string(), interval, candles, fetched_at: now_unix() })
 }
 
-/// Latest price (and its bar) for the paper desk.
-pub fn fetch_last(symbol: &str) -> Result<Candle> {
-    let s = fetch_yahoo(symbol, Interval::M5, "1d")?;
-    s.candles.last().copied().ok_or_else(|| anyhow!("No quote for {symbol}"))
+/// Latest trade price for the paper desk.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Quote {
+    pub price: f64,
+    /// Unix seconds of the last trade.
+    pub t: i64,
+    pub prev_close: f64,
+}
+
+impl Quote {
+    pub fn change_pct(&self) -> f64 {
+        if self.prev_close > 0.0 { (self.price / self.prev_close - 1.0) * 100.0 } else { 0.0 }
+    }
+}
+
+pub fn fetch_quote(symbol: &str) -> Result<Quote> {
+    #[derive(Deserialize)]
+    struct R {
+        chart: C,
+    }
+    #[derive(Deserialize)]
+    struct C {
+        result: Option<Vec<M>>,
+    }
+    #[derive(Deserialize)]
+    struct M {
+        meta: Meta,
+    }
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Meta {
+        regular_market_price: Option<f64>,
+        regular_market_time: Option<i64>,
+        chart_previous_close: Option<f64>,
+        previous_close: Option<f64>,
+    }
+    let url = format!("https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d&range=1d");
+    let r: R = serde_json::from_str(&http_get(&url)?)?;
+    let m = r.chart.result.and_then(|mut v| v.pop()).ok_or_else(|| anyhow!("No quote for {symbol}"))?.meta;
+    let price = m.regular_market_price.filter(|p| *p > 0.0).ok_or_else(|| anyhow!("No price for {symbol}"))?;
+    Ok(Quote { price, t: m.regular_market_time.unwrap_or_else(now_unix), prev_close: m.chart_previous_close.or(m.previous_close).unwrap_or(0.0) })
 }
 
 #[derive(Clone, Debug)]

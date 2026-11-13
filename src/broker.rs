@@ -214,18 +214,16 @@ impl Account {
         if !(r.qty.is_finite() && r.qty >= 1.0) {
             return Err(Rejected("Quantity must be at least 1 share.".into()));
         }
-        if let Some(p) = kind.price() {
-            if !(p.is_finite() && p > 0.0) {
+        if let Some(p) = kind.price()
+            && !(p.is_finite() && p > 0.0) {
                 return Err(Rejected("Enter a price above zero.".into()));
             }
-        }
         let reference = kind.price().or_else(|| self.last_price(&r.symbol)).ok_or_else(|| Rejected("No price yet for this symbol.".into()))?;
         for (name, lvl) in [("Stop-loss", r.stop_loss), ("Take-profit", r.take_profit)] {
-            if let Some(l) = lvl {
-                if !(l.is_finite() && l > 0.0) {
+            if let Some(l) = lvl
+                && !(l.is_finite() && l > 0.0) {
                     return Err(Rejected(format!("{name} must be a price above zero.")));
                 }
-            }
         }
         let below = |x: Option<f64>| x.is_none_or(|x| x < reference);
         let above = |x: Option<f64>| x.is_none_or(|x| x > reference);

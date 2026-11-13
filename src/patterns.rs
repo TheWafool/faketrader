@@ -254,24 +254,22 @@ pub fn detect(c: &[Candle]) -> Vec<Signal> {
             }
         }
         // Head and shoulders: three pivot highs, middle highest, shoulders level.
-        if let [.., (s1, a1), (hd, hh), (s2, a2)] = highs[..] {
-            if used_hs != Some(s2) && hh > a1.max(a2) * 1.01 && (a1 - a2).abs() / a1 < p::DOUBLE_TOLERANCE * 1.5 && s2 - s1 <= 2 * p::DOUBLE_MAX_GAP {
+        if let [.., (s1, a1), (hd, hh), (s2, a2)] = highs[..]
+            && used_hs != Some(s2) && hh > a1.max(a2) * 1.01 && (a1 - a2).abs() / a1 < p::DOUBLE_TOLERANCE * 1.5 && s2 - s1 <= 2 * p::DOUBLE_MAX_GAP {
                 let neck = c[s1..=hd].iter().map(|x| x.l).fold(f64::MAX, f64::min).max(c[hd..=s2].iter().map(|x| x.l).fold(f64::MAX, f64::min));
                 if c[i].c < neck && c[i - 1].c >= neck && i - s2 < 30 {
                     out.push(Signal { pattern: Pattern::HeadAndShoulders, start: s1, index: i });
                     used_hs = Some(s2);
                 }
             }
-        }
-        if let [.., (s1, a1), (hd, hl), (s2, a2)] = lows[..] {
-            if used_ihs != Some(s2) && hl < a1.min(a2) * 0.99 && (a1 - a2).abs() / a1 < p::DOUBLE_TOLERANCE * 1.5 && s2 - s1 <= 2 * p::DOUBLE_MAX_GAP {
+        if let [.., (s1, a1), (hd, hl), (s2, a2)] = lows[..]
+            && used_ihs != Some(s2) && hl < a1.min(a2) * 0.99 && (a1 - a2).abs() / a1 < p::DOUBLE_TOLERANCE * 1.5 && s2 - s1 <= 2 * p::DOUBLE_MAX_GAP {
                 let neck = c[s1..=hd].iter().map(|x| x.h).fold(f64::MIN, f64::max).min(c[hd..=s2].iter().map(|x| x.h).fold(f64::MIN, f64::max));
                 if c[i].c > neck && c[i - 1].c <= neck && i - s2 < 30 {
                     out.push(Signal { pattern: Pattern::InverseHeadAndShoulders, start: s1, index: i });
                     used_ihs = Some(s2);
                 }
             }
-        }
 
         // Range breakout / breakdown, first close only.
         if i > p::BREAKOUT_BARS {

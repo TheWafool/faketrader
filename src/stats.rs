@@ -120,11 +120,10 @@ pub fn coaching(s: &Stats, return_pct: f64, hold_pct: f64) -> Vec<String> {
     if s.losses > 0 && s.wins > 0 && s.avg_loss.abs() > s.avg_win * 1.5 {
         out.push(format!("Average loss (${:.0}) is much bigger than average win (${:.0}). Cut losers at the stop instead of hoping.", s.avg_loss.abs(), s.avg_win));
     }
-    if let Some(c) = s.capture {
-        if c < 0.4 && s.wins >= 2 {
+    if let Some(c) = s.capture
+        && c < 0.4 && s.wins >= 2 {
             out.push(format!("Winners kept {:.0}% of their best move. Consider a target or a trailing stop.", c * 100.0));
         }
-    }
     if s.max_loss_streak >= 4 {
         out.push(format!("{} losses in a row at one point. After 3, pause and re-read the chart before the next entry.", s.max_loss_streak));
     }
