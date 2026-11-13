@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=FakeTrader
+GenericName=Trading trainer
+Comment=Practice trading on real charts without risking money
+Exec=faketrader
+Icon=faketrader
+Terminal=false
+Categories=Office;Finance;Education;
+Keywords=stocks;trading;paper;practice;chart;
+StartupWMClass=faketrader

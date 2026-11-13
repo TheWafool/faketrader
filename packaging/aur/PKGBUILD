@@ -1,0 +1,47 @@
+# Maintainer: waffled
+# Set `url` to the public repository before publishing to the AUR, then run
+# `updpkgsums` to fill in sha256sums for the tagged release tarball.
+pkgname=faketrader
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Paper trading trainer: replay real charts bar by bar, quiz yourself on patterns, journal every trade"
+arch=('x86_64' 'aarch64')
+url="https://github.com/OWNER/faketrader"
+license=('MIT')
+depends=('gcc-libs' 'glibc' 'libglvnd' 'libxkbcommon' 'wayland' 'libx11' 'libxcursor' 'libxrandr' 'libxi' 'hicolor-icon-theme')
+makedepends=('cargo')
+optdepends=('xdg-desktop-portal: file dialogs for CSV import and journal export')
+options=('!lto' '!debug')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "$pkgname-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  cd "$pkgname-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+  cargo build --frozen --release
+}
+
+check() {
+  cd "$pkgname-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo test --frozen --release --lib
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  install -Dm755 target/release/faketrader "$pkgdir/usr/bin/faketrader"
+  install -Dm644 packaging/linux/faketrader.desktop "$pkgdir/usr/share/applications/faketrader.desktop"
+  install -Dm644 assets/icon.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/faketrader.svg"
+  install -Dm644 assets/icon-256.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/faketrader.png"
+  install -Dm644 assets/icon-512.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/faketrader.png"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 assets/fonts/OFL-Barlow.txt "$pkgdir/usr/share/licenses/$pkgname/OFL-Barlow.txt"
+  install -Dm644 assets/fonts/OFL-IBMPlexMono.txt "$pkgdir/usr/share/licenses/$pkgname/OFL-IBMPlexMono.txt"
+}
